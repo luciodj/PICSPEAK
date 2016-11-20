@@ -1,0 +1,7 @@
+Progetto PICSPEAK
+
+file presenti in questa directory:
+
+PICSPEAK.asm	decompressore audio per PIC 16C54/6
+CPRS		programmino di test sulla comprimibilità (metodo delta)
+SOUNDTST.pas	programma principale di compressione massima e 				manipolazione di file .WAV
