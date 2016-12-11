@@ -51,7 +51,7 @@ S12             equ     5
 COMPRESSED      equ     6       ; due nibble per campione
 LAST            equ     7       ; marca l'ultimo Flag
 
-SILENCE         equ     00      ; il pezzo zero e' silenzio
+SILENCE         equ     0ff      ; silenzio
 ; usare sempre VOL1 con il silenzio
 
 ; Flag definiti
@@ -157,11 +157,13 @@ Parte
         bcf     Flags,Flag_Sil  ; setta il flag in accordo
         incf    Puntatore
 
+		bcf     PCLATH,0
         call    Estrai0         ; get NCOINC
-        movwf   NCO1INCL
-        incf    Puntatore
-        call    Estrai0
         movwf   NCO1INCH
+        incf    Puntatore
+		bcf     PCLATH,0
+        call    Estrai0
+        movwf   NCO1INCL
         incf    Puntatore
 Segment
 		bcf     PCLATH,0
@@ -311,7 +313,7 @@ Brano3          retlw   Hackaday-TabIn
 
 #define VOWELA  .524
 #define VOWELE  .645
-#define VOWELI  .800
+#define VOWELI  .870
 
 ; tabella di composizione del brano "Hackaday"
 
@@ -320,54 +322,54 @@ Hackaday        retlw   8               ; numero delle parti componenti
 ; 'A
         retlw   1               ; pag
         retlw   PezzoA-TabIn2   ; puntatore al pezzo
-        retlw   LOW(VOWELA)
         retlw   HIGH(VOWELA)
+        retlw   LOW(VOWELA)
         retlw   VOL1  | .15 | 1<<LAST
 
 ; silenzio
         retlw   0               ; pag
         retlw   SILENCE         ; puntatore a 1/60s di silenzio
-        retlw   LOW(EIGHTK)
         retlw   HIGH(EIGHTK)
-        retlw   VOL1  | .8 | 1<<LAST ; 1/10s silenzio
+        retlw   LOW(EIGHTK)
+        retlw   VOL1  | .1 | 1<<LAST ; 1/10s silenzio
 
 ; short S (k)
         retlw   1               ; pag
         retlw   PezzoS-TabIn2   ; puntatore al pezzo
-        retlw   LOW(EIGHTK)
         retlw   HIGH(EIGHTK)
+        retlw   LOW(EIGHTK)
         retlw   1<<COMPRESSED | .3 | 1<<LAST
 
 ; 'A
         retlw   1               ; pag
         retlw   PezzoA-TabIn2   ; puntatore al pezzo
-        retlw   LOW(VOWELA)
         retlw   HIGH(VOWELA)
+        retlw   LOW(VOWELA)
         retlw   VOL1  | .10 | 1<<LAST
 
 ; D
         retlw   1               ; pag
-        retlw   (PezzoM-TabIn2) ; puntatore al pezzo
-        retlw   LOW(EIGHTK)
+        retlw   PezzoM-TabIn2   ; puntatore al pezzo
         retlw   HIGH(EIGHTK)
+        retlw   LOW(EIGHTK)
 ;        retlw   VOL34 | 4
         retlw   VOL1  | 4 | 1<<LAST
 
 ; E
         retlw   1               ; pag. 1
-        retlw   (PezzoA-TabIn2)   ; puntatore al pezzo
-        retlw   LOW(VOWELE)
+        retlw   PezzoA-TabIn2   ; puntatore al pezzo
         retlw   HIGH(VOWELE)
-        retlw   VOL1 | 8
-        retlw   VOL12 | 4| 1<<LAST
+        retlw   LOW(VOWELE)
+        retlw   VOL1 | .15
+        retlw   VOL12 | .15| 1<<LAST
 
 ; I
         retlw   1               ; pag. 1
         retlw   PezzoA-TabIn2   ; puntatore al pezzo
-        retlw   LOW(VOWELI)
         retlw   HIGH(VOWELI)
+        retlw   LOW(VOWELI)
 ;        retlw   VOL14 | 2
-        retlw   VOL1  | 4
+        retlw   VOL1  | .15
         retlw   VOL34 | 8
         retlw   VOL12 | 4
         retlw   VOL14 | 4 | 1<<LAST
@@ -375,8 +377,8 @@ Hackaday        retlw   8               ; numero delle parti componenti
 ; silenzio
         retlw   0               ; pag
         retlw   SILENCE         ; puntatore a 1/60s di silenzio
-        retlw   LOW(EIGHTK)
         retlw   HIGH(EIGHTK)
+        retlw   LOW(EIGHTK)
         retlw   VOL1  | .15 | 1<<LAST ; 1/10s silenzio
 
 
@@ -410,7 +412,8 @@ Estrai1         movf    Puntatore,W     ;
 ;
 TabIn2          ; offset inizio tabella in pag 2
 
-PezzoA          retlw   .80     ; numero campioni
+        nop
+PezzoA  retlw   .80     ; numero campioni
 		retlw	082
 		retlw	084
 		retlw	084
