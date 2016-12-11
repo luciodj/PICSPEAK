@@ -312,67 +312,82 @@ Brano3          retlw   Hackaday-TabIn
 ;
 
 #define VOWELA  .524
-#define VOWELE  .645
+#define VOWELE  .600
 #define VOWELI  .870
+#define DDD     .480
 
 ; tabella di composizione del brano "Hackaday"
 
-Hackaday        retlw   8               ; numero delle parti componenti
+Hackaday        retlw   .10     ; numero delle parti componenti
 
 ; 'A
         retlw   1               ; pag
         retlw   PezzoA-TabIn2   ; puntatore al pezzo
         retlw   HIGH(VOWELA)
         retlw   LOW(VOWELA)
-        retlw   VOL1  | 8 | 1<<LAST
+        retlw   VOL34 | 8
+        retlw   VOL1  | 4 | 1<<LAST
 
 ; silenzio
         retlw   0               ; pag
         retlw   SILENCE         ; puntatore a 1/60s di silenzio
         retlw   HIGH(EIGHTK)
         retlw   LOW(EIGHTK)
-        retlw   VOL1  | .1 | 1<<LAST ; 1/10s silenzio
+        retlw   VOL1  | .3 | 1<<LAST ; 1/10s silenzio
 
 ; short S (k)
         retlw   1               ; pag
         retlw   PezzoS-TabIn2   ; puntatore al pezzo
         retlw   HIGH(EIGHTK)
         retlw   LOW(EIGHTK)
-        retlw   1<<COMPRESSED | .3 | 1<<LAST
+        retlw   1<<COMPRESSED | .1 | 1<<LAST
+
+; silenzio
+        retlw   0               ; pag
+        retlw   SILENCE         ; puntatore a 1/60s di silenzio
+        retlw   HIGH(EIGHTK)
+        retlw   LOW(EIGHTK)
+        retlw   VOL1  | .3 | 1<<LAST ; 1/10s silenzio
 
 ; 'A
         retlw   1               ; pag
         retlw   PezzoA-TabIn2   ; puntatore al pezzo
         retlw   HIGH(VOWELA)
         retlw   LOW(VOWELA)
-        retlw   VOL1  | 8 | 1<<LAST
+        retlw   VOL34 | 4
+        retlw   VOL1  | 4 | 1<<LAST
+
+; silenzio
+        retlw   0               ; pag
+        retlw   SILENCE         ; puntatore a 1/60s di silenzio
+        retlw   HIGH(EIGHTK)
+        retlw   LOW(EIGHTK)
+        retlw   VOL1  | .3 | 1<<LAST ; 1/10s silenzio
 
 ; D
         retlw   1               ; pag
         retlw   PezzoM-TabIn2   ; puntatore al pezzo
-        retlw   HIGH(EIGHTK)
-        retlw   LOW(EIGHTK)
-        retlw   VOL34 | 4
-        retlw   VOL1  | 4 | 1<<LAST
+        retlw   HIGH(DDD)
+        retlw   LOW(DDD)
+        retlw   VOL34 | 2
+        retlw   VOL12 | 2 | 1<<LAST
 
 ; E
         retlw   1               ; pag. 1
         retlw   PezzoA-TabIn2   ; puntatore al pezzo
         retlw   HIGH(VOWELE)
         retlw   LOW(VOWELE)
-        retlw   VOL1 | .8
-        retlw   VOL12 | .4| 1<<LAST
+        retlw   VOL12 | .8
+        retlw   VOL12 | .8| 1<<LAST
 
 ; I
         retlw   1               ; pag. 1
         retlw   PezzoA-TabIn2   ; puntatore al pezzo
         retlw   HIGH(VOWELI)
         retlw   LOW(VOWELI)
-        retlw   VOL12 | 8
-;        retlw   VOL1  | 4
-;        retlw   VOL34 | 4
-        retlw   VOL12 | 4
-        retlw   VOL14 | 4 | 1<<LAST
+        retlw   VOL14 | 8
+;        retlw   VOL14 | 8
+        retlw   VOL14 | 8 | 1<<LAST
 
 ; silenzio
         retlw   0               ; pag
