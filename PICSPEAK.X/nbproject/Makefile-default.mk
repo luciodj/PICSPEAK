@@ -28,13 +28,13 @@ CP=cp
 CND_CONF=default
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
 IMAGE_TYPE=debug
-OUTPUT_SUFFIX=null
-DEBUGGABLE_SUFFIX=null
+OUTPUT_SUFFIX=cof
+DEBUGGABLE_SUFFIX=cof
 FINAL_IMAGE=dist/${CND_CONF}/${IMAGE_TYPE}/PICSPEAK.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
 else
 IMAGE_TYPE=production
-OUTPUT_SUFFIX=null
-DEBUGGABLE_SUFFIX=null
+OUTPUT_SUFFIX=hex
+DEBUGGABLE_SUFFIX=cof
 FINAL_IMAGE=dist/${CND_CONF}/${IMAGE_TYPE}/PICSPEAK.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
 endif
 
@@ -51,17 +51,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=
+SOURCEFILES_QUOTED_IF_SPACED=picspeak.ASM
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=
-POSSIBLE_DEPFILES=
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/picspeak.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/picspeak.o.d
 
 # Object Files
-OBJECTFILES=
+OBJECTFILES=${OBJECTDIR}/picspeak.o
 
 # Source Files
-SOURCEFILES=
+SOURCEFILES=picspeak.ASM
 
 
 CFLAGS=
@@ -88,7 +88,31 @@ MP_LINKER_DEBUG_OPTION=
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: assemble
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
+${OBJECTDIR}/picspeak.o: picspeak.ASM  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/picspeak.o.d 
+	@${RM} ${OBJECTDIR}/picspeak.o 
+	@${FIXDEPS} dummy.d -e "/Users/m91329/Developer/MPLABXProjects/8-bit/SPIC/PICSPEAK.X/picspeak.ERR" $(SILENT) -c ${MP_AS} $(MP_EXTRA_AS_PRE) -d__DEBUG -d__MPLAB_DEBUGGER_PK3=1 -q -p$(MP_PROCESSOR_OPTION) -u  $(ASM_OPTIONS) -w1   \\\"/Users/m91329/Developer/MPLABXProjects/8-bit/SPIC/PICSPEAK.X/picspeak.ASM\\\" 
+	@${MV}  /Users/m91329/Developer/MPLABXProjects/8-bit/SPIC/PICSPEAK.X/picspeak.O ${OBJECTDIR}/picspeak.o
+	@${MV}  /Users/m91329/Developer/MPLABXProjects/8-bit/SPIC/PICSPEAK.X/picspeak.ERR ${OBJECTDIR}/picspeak.o.err
+	@${MV}  /Users/m91329/Developer/MPLABXProjects/8-bit/SPIC/PICSPEAK.X/picspeak.LST ${OBJECTDIR}/picspeak.o.lst
+	@${RM}  /Users/m91329/Developer/MPLABXProjects/8-bit/SPIC/PICSPEAK.X/picspeak.HEX 
+	@${DEP_GEN} -d "${OBJECTDIR}/picspeak.o"
+	@${FIXDEPS} "${OBJECTDIR}/picspeak.o.d" $(SILENT) -rsi ${MP_AS_DIR} -c18 
+	
 else
+${OBJECTDIR}/picspeak.o: picspeak.ASM  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/picspeak.o.d 
+	@${RM} ${OBJECTDIR}/picspeak.o 
+	@${FIXDEPS} dummy.d -e "/Users/m91329/Developer/MPLABXProjects/8-bit/SPIC/PICSPEAK.X/picspeak.ERR" $(SILENT) -c ${MP_AS} $(MP_EXTRA_AS_PRE) -q -p$(MP_PROCESSOR_OPTION) -u  $(ASM_OPTIONS) -w1   \\\"/Users/m91329/Developer/MPLABXProjects/8-bit/SPIC/PICSPEAK.X/picspeak.ASM\\\" 
+	@${MV}  /Users/m91329/Developer/MPLABXProjects/8-bit/SPIC/PICSPEAK.X/picspeak.O ${OBJECTDIR}/picspeak.o
+	@${MV}  /Users/m91329/Developer/MPLABXProjects/8-bit/SPIC/PICSPEAK.X/picspeak.ERR ${OBJECTDIR}/picspeak.o.err
+	@${MV}  /Users/m91329/Developer/MPLABXProjects/8-bit/SPIC/PICSPEAK.X/picspeak.LST ${OBJECTDIR}/picspeak.o.lst
+	@${RM}  /Users/m91329/Developer/MPLABXProjects/8-bit/SPIC/PICSPEAK.X/picspeak.HEX 
+	@${DEP_GEN} -d "${OBJECTDIR}/picspeak.o"
+	@${FIXDEPS} "${OBJECTDIR}/picspeak.o.d" $(SILENT) -rsi ${MP_AS_DIR} -c18 
+	
 endif
 
 # ------------------------------------------------------------------------------------
