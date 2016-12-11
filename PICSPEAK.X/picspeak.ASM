@@ -97,14 +97,26 @@ IO_Init
 T2_Init
         movlw   B'000011100'	; T2on, T2pre = 1:1, T2post = 1:4
 		movwf	T2CON
-		movlw	D'124'          ; 32kHz (FOSC/4 /1 / (124+1)
-		movwf	PR2             ; 8kHz interrupt TMR2IF
+		movlw	D'124'          ; 32kHz (FOSC/4 /1 / (124+1) = PWM period
+		movwf	PR2             ; 8kHz = TMR2IF period
 
 PWM1_Init
         movlw   D'64'           ; valore centrale di riposo
         movwf   PWM1DCH
 		movlw	B'11000000'     ; PWM1 enable, output enable
 		movwf	PWM1CON         ;
+
+;#define EIGHTK  .524
+#define EIGHTK  .480
+NCO_Init
+        movlw   LOW(EIGHTK)
+        movwf   NCO1INCL
+        movlw   HIGH(EIGHTK)
+        movwf   NCO1INCH
+        movlw   B'00000010'     ; NCO clk = 16MHz, output 1 clock
+        movwf   NCO1CLK
+        movlw   B'10000000'     ; NCO enabled, fixed duty cycle mode, no output
+        movwf   NCO1CON
 main
         clrf    PageS           ; seleziona le tabelle in  pagina 0
 ;
@@ -122,7 +134,7 @@ main
 ; dalla tabella dei brani seleziona il brano richiesto e punta al suo inizio
 ;
 Brano
-		bcf	PCLATH,0	; tutti i brani sono in pag 0
+		bcf     PCLATH,0        ; tutti i brani sono in pag 0
 		movwf   Puntatore       ;
         call    Estrai0         ; legge dalla tabella il puntatore
                                 ; al brano in W (solo in pag. 0)
@@ -132,7 +144,7 @@ Brano
         incf    Puntatore       ; punta all'inizio della prima parte
 Parte
 ; loop sulle parti di un brano
-		bcf	PCLATH,0	; tutti i brani sono in pag 0
+		bcf     PCLATH,0        ; tutti i brani sono in pag 0
 		call    Estrai0         ; legge il selettore di pagina
         movwf   PageS           ; mette da parte il valore
         incf    Puntatore
@@ -144,7 +156,7 @@ Parte
         bcf     Flags,Flag_Sil  ; setta il flag in accordo
         incf    Puntatore
 Segment
-		bcf	PCLATH,0
+		bcf     PCLATH,0
         call    Estrai0         ; legge i flag di Segment
         movwf   FlagSegm        ; salva
         andlw   0F              ; separa il numero di ripetizioni
@@ -218,12 +230,14 @@ AddOffs
 
 Output
 ; loop di 10us si accorge di essere arrivato mediamente con 2us di ritardo
-		btfss   PIR1,TMR2IF     ; se sono passati 125us
+;		btfss   PIR1,TMR2IF     ; se sono passati 125us
+		btfss   PIR1,NCO1IF     ; time to update?
 		goto	Output
-		bcf	PIR1,TMR2IF
+;		bcf     PIR1,TMR2IF
+		bcf     PIR1,NCO1IF
 
 		CLRC
-		rrf	Acc,W
+		rrf     Acc,W
         movwf   PWM1DCH         ; lo mette subito in uscita
 
         btfss   FlagSegm,COMPRESSED ; se non sta espandendo
@@ -291,29 +305,17 @@ Brano3          retlw   Sistemax-TabIn
 
 Sistemax        retlw   7               ; numero delle parti componenti
 
-; testing sinusoid with envelope
-; 		retlw	0		; page
-;		retlw	Sinus-TabIn
-;		retlw	VOL1  | .15
-;		retlw	VOL1  | .15
-;		retlw	VOL12  | .15
-;		retlw	VOL12  | .15
-;		retlw	VOL14  | .15
-;		retlw	VOL14  | .15
-;		retlw	VOL12  | .15
-;		retlw	VOL12  | .15 | 1<<LAST
-
 ; prima parte   la consonante S
         retlw   0               ; pag. 1
         retlw   (PezzoS-TabIn)   ; puntatore al pezzo
-        retlw   1<<COMPRESSED | .3 | 1<<LAST
+        retlw   1<<COMPRESSED | .6 | 1<<LAST
 
 ; 2 parte   la vocale I
         retlw   1               ; pag. 1
         retlw   PezzoI-TabIn2   ; puntatore al pezzo
         retlw   VOL14 | 2
         retlw   VOL1  | 4
-        retlw   VOL34 | 2
+        retlw   VOL34 | 4
         retlw   VOL12 | 2
         retlw   VOL14 | 2 | 1<<LAST
 
@@ -345,71 +347,13 @@ Sistemax        retlw   7               ; numero delle parti componenti
         retlw   1               ; pag
         retlw   PezzoA-TabIn2   ; puntatore al pezzo
         retlw   VOL1  | 7
-        retlw   VOL12 | 4 | 1<<LAST
+        retlw   VOL12 | 7 | 1<<LAST
 
 
-;;-----------------------------------------------------------------------------
-;; MA
-;Ma              retlw   2               ; numero delle parti componenti
-;; 1 parte  la consonante M
-;                retlw   1               ; pag. 1
-;                retlw   PezzoM-TabIn2   ; puntatore al pezzo
-;                retlw   VOL34 | 4
-;                retlw   VOL1  | 4 | LAST
-;
-;; 2 parte   la vocale A
-;                retlw   0               ; pag. 0
-;                retlw   PezzoA-TabIn
-;                retlw   VOL1  | 8
-;                retlw   VOL12 | 4 | LAST
-;
-;----------------------------------------------------------------------------
-; IES
-;
-;Ies             retlw   3               ; numero delle parti componenti
-;
-;; 1 parte   la vocale I
-;                retlw   1               ; pag. 1
-;                retlw   PezzoI-TabIn2   ; puntatore al pezzo e
-;                retlw   VOL14 | 2
-;                retlw   VOL1  | 2       ;
-;                retlw   VOL34 | 2
-;                retlw   VOL12 | 2 | LAST
-;
-;; 2 parte   la vocale E
-;                retlw   0               ; pag. 0
-;                retlw   PezzoE-TabIn
-;                retlw   VOL14 | 1       ; accento sul fondo della E
-;                retlw   VOL12 | 1
-;                retlw   VOL34 | 1
-;                retlw   VOL12 | 1
-;                retlw   VOL14 | 4 | LAST
-;
-;; 3 parte   la consonante S di nuovo
-;                retlw   1               ; pag. 1
-;                retlw   PezzoS-TabIn2   ; puntatore al pezzo e
-;                retlw   COMPRESSED | 3 | LAST
-;
-;;-----------------------------------------------------------------------------
-;Si              retlw   2               ; numero delle parti componenti
-;
-;; prima parte   la consonante S
-;                retlw   1               ; pag. 1
-;                retlw   PezzoS-TabIn2   ; puntatore al pezzo e
-;                retlw   COMPRESSED | 3 | LAST
-;
-;; 2 parte   la vocale I
-;                retlw   1               ; pag. 1
-;                retlw   PezzoI-TabIn2   ; puntatore al pezzo e
-;                retlw   VOL14 | 2
-;                retlw   VOL1  | 4
-;                retlw   VOL34 | 2
-;                retlw   VOL12 | 2
-;                retlw   VOL14 | 2 | LAST
-;
 ;----------------------------------------------------------------------------
 ;
-PezzoS          retlw   .107*2     ; numero campioni (compressi): 2x
+;PezzoS          retlw   .107*2     ; numero campioni (compressi): 2x
+PezzoS          retlw   .99*2     ; numero campioni (compressi): 2x
 		retlw	00E
 		retlw	00F
 		retlw	00E
@@ -510,14 +454,14 @@ PezzoS          retlw   .107*2     ; numero campioni (compressi): 2x
 		retlw	00D
 		retlw	01F
 		retlw	02B
-		retlw	009
-		retlw	03D
-		retlw	0FB
-		retlw	00A
-		retlw	026
-		retlw	0E0
-		retlw	05F
-		retlw	050
+;		retlw	009
+;		retlw	03D
+;		retlw	0FB
+;		retlw	00A
+;		retlw	026
+;		retlw	0E0
+;		retlw	05F
+;		retlw	050
 ;		retlw	0F6
 
 ;Sinus
