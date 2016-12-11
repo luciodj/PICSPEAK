@@ -45,12 +45,12 @@ VOL1            equ     00      ; volume al 100%
 VOL14           equ     10      ; volume al 25%
 VOL12           equ     20      ; volume al 50%
 VOL34           equ     30      ; volume al 75%
-S14             equ	4
-S12             equ	5
+S14             equ     4
+S12             equ     5
 COMPRESSED      equ     6       ; due nibble per campione
 LAST            equ     7       ; marca l'ultimo Flag
 
-SILENCE         equ     00      ; il pezzo zero e' silenzio
+SILENCE         equ     0ff     ; signature
 ; usare sempre VOL1 con il silenzio
 
 ; Flag definiti
@@ -122,7 +122,7 @@ main
 ; dalla tabella dei brani seleziona il brano richiesto e punta al suo inizio
 ;
 Brano
-		bcf	PCLATH,0	; tutti i brani sono in pag 0
+		bcf     PCLATH,0        ; tutti i brani sono in pag 0
 		movwf   Puntatore       ;
         call    Estrai0         ; legge dalla tabella il puntatore
                                 ; al brano in W (solo in pag. 0)
@@ -132,7 +132,7 @@ Brano
         incf    Puntatore       ; punta all'inizio della prima parte
 Parte
 ; loop sulle parti di un brano
-		bcf	PCLATH,0	; tutti i brani sono in pag 0
+		bcf     PCLATH,0        ; tutti i brani sono in pag 0
 		call    Estrai0         ; legge il selettore di pagina
         movwf   PageS           ; mette da parte il valore
         incf    Puntatore
@@ -144,7 +144,7 @@ Parte
         bcf     Flags,Flag_Sil  ; setta il flag in accordo
         incf    Puntatore
 Segment
-		bcf	PCLATH,0
+		bcf     PCLATH,0
         call    Estrai0         ; legge i flag di Segment
         movwf   FlagSegm        ; salva
         andlw   0F              ; separa il numero di ripetizioni
@@ -220,10 +220,10 @@ Output
 ; loop di 10us si accorge di essere arrivato mediamente con 2us di ritardo
 		btfss   PIR1,TMR2IF     ; se sono passati 125us
 		goto	Output
-		bcf	PIR1,TMR2IF
+		bcf     PIR1,TMR2IF
 
 		CLRC
-		rrf	Acc,W
+		rrf     Acc,W
         movwf   PWM1DCH         ; lo mette subito in uscita
 
         btfss   FlagSegm,COMPRESSED ; se non sta espandendo
@@ -290,18 +290,6 @@ Brano3          retlw   Sistemax-TabIn
 ; tabella di composizione del brano "sistemax.wav"
 
 Sistemax        retlw   7               ; numero delle parti componenti
-
-; testing sinusoid with envelope
-; 		retlw	0		; page
-;		retlw	Sinus-TabIn
-;		retlw	VOL1  | .15
-;		retlw	VOL1  | .15
-;		retlw	VOL12  | .15
-;		retlw	VOL12  | .15
-;		retlw	VOL14  | .15
-;		retlw	VOL14  | .15
-;		retlw	VOL12  | .15
-;		retlw	VOL12  | .15 | 1<<LAST
 
 ; prima parte   la consonante S
         retlw   0               ; pag. 1
@@ -409,7 +397,7 @@ Sistemax        retlw   7               ; numero delle parti componenti
 ;
 ;----------------------------------------------------------------------------
 ;
-PezzoS          retlw   .107*2     ; numero campioni (compressi): 2x
+PezzoS  retlw   .107*2     ; numero campioni (compressi): 2x
 		retlw	00E
 		retlw	00F
 		retlw	00E
