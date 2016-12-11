@@ -107,8 +107,8 @@ PWM1_Init
 		movlw	B'11000000'     ; PWM1 enable, output enable
 		movwf	PWM1CON         ;
 
-;#define EIGHTK  .524
-#define EIGHTK  .480
+#define EIGHTK  .524            ; NCO will produce an 8kHz pulse
+
 NCO_Init
         movlw   LOW(EIGHTK)
         movwf   NCO1INCL
@@ -156,6 +156,13 @@ Parte
         incfsz  PuntPezzo,W     ; silenzio
         bcf     Flags,Flag_Sil  ; setta il flag in accordo
         incf    Puntatore
+
+        call    Estrai0         ; get NCOINC
+        movwf   NCO1INCL
+        incf    Puntatore
+        call    Estrai0
+        movwf   NCO1INCH
+        incf    Puntatore
 Segment
 		bcf     PCLATH,0
         call    Estrai0         ; legge i flag di Segment
@@ -185,7 +192,7 @@ SampleL
         movlw   D'128'
 		btfsc   Flags,Flag_Sil	; silence samples are predef.
 		goto	SaveS
-                ESTRAI			; estrae dalla pagina giusta un sample
+        ESTRAI                  ; estrae dalla pagina giusta un sample
 SaveS
 		movwf   Acc             ; lo salva nell'accumulatore
 
@@ -302,6 +309,10 @@ Brano3          retlw   Hackaday-TabIn
 ; PezzoYS..     etc...
 ;
 
+#define VOWELA  .524
+#define VOWELE  .645
+#define VOWELI  .800
+
 ; tabella di composizione del brano "Hackaday"
 
 Hackaday        retlw   8               ; numero delle parti componenti
@@ -309,40 +320,54 @@ Hackaday        retlw   8               ; numero delle parti componenti
 ; 'A
         retlw   1               ; pag
         retlw   PezzoA-TabIn2   ; puntatore al pezzo
+        retlw   LOW(VOWELA)
+        retlw   HIGH(VOWELA)
         retlw   VOL1  | .15 | 1<<LAST
 
 ; silenzio
         retlw   0               ; pag
         retlw   SILENCE         ; puntatore a 1/60s di silenzio
+        retlw   LOW(EIGHTK)
+        retlw   HIGH(EIGHTK)
         retlw   VOL1  | .8 | 1<<LAST ; 1/10s silenzio
 
 ; short S (k)
-        retlw   0               ; pag
-        retlw   (PezzoS-TabIn)  ; puntatore al pezzo
+        retlw   1               ; pag
+        retlw   PezzoS-TabIn2   ; puntatore al pezzo
+        retlw   LOW(EIGHTK)
+        retlw   HIGH(EIGHTK)
         retlw   1<<COMPRESSED | .3 | 1<<LAST
 
 ; 'A
         retlw   1               ; pag
         retlw   PezzoA-TabIn2   ; puntatore al pezzo
+        retlw   LOW(VOWELA)
+        retlw   HIGH(VOWELA)
         retlw   VOL1  | .10 | 1<<LAST
 
 ; D
         retlw   1               ; pag
         retlw   (PezzoM-TabIn2) ; puntatore al pezzo
+        retlw   LOW(EIGHTK)
+        retlw   HIGH(EIGHTK)
 ;        retlw   VOL34 | 4
-        retlw   VOL34  | 8 | 1<<LAST
+        retlw   VOL1  | 4 | 1<<LAST
 
 ; E
         retlw   1               ; pag. 1
-        retlw   (PezzoE-TabIn2)   ; puntatore al pezzo
-        retlw   VOL34 | 6
+        retlw   (PezzoA-TabIn2)   ; puntatore al pezzo
+        retlw   LOW(VOWELE)
+        retlw   HIGH(VOWELE)
+        retlw   VOL1 | 8
         retlw   VOL12 | 4| 1<<LAST
 
 ; I
         retlw   1               ; pag. 1
-        retlw   PezzoI-TabIn2   ; puntatore al pezzo
+        retlw   PezzoA-TabIn2   ; puntatore al pezzo
+        retlw   LOW(VOWELI)
+        retlw   HIGH(VOWELI)
 ;        retlw   VOL14 | 2
-;        retlw   VOL1  | 4
+        retlw   VOL1  | 4
         retlw   VOL34 | 8
         retlw   VOL12 | 4
         retlw   VOL14 | 4 | 1<<LAST
@@ -350,9 +375,182 @@ Hackaday        retlw   8               ; numero delle parti componenti
 ; silenzio
         retlw   0               ; pag
         retlw   SILENCE         ; puntatore a 1/60s di silenzio
+        retlw   LOW(EIGHTK)
+        retlw   HIGH(EIGHTK)
         retlw   VOL1  | .15 | 1<<LAST ; 1/10s silenzio
 
 
+
+;Sinus
+;		retlw	.16
+;		retlw	.128	; 0
+;		retlw	.148	; 1
+;		retlw	.168	; 2
+;		retlw	.178	; 3
+;		retlw	.184	; 4
+;		retlw	.178	; 5
+;		retlw	.168	; 6
+;		retlw	.148	; 7
+;		retlw	.128	; 8
+;		retlw	.108	; 9
+;		retlw	.88	; 10
+;		retlw	.78	; 11
+;		retlw	.74	; 12
+;		retlw	.78	; 13
+;		retlw	.88	; 14
+;		retlw	.108	; 15
+
+
+;****************************************************************************
+;
+                ORG     100             ; inizio seconda pagina dati
+
+Estrai1         movf    Puntatore,W     ;
+                addwf   PCL             ; somma l'offset in W al PC
+;
+TabIn2          ; offset inizio tabella in pag 2
+
+PezzoA          retlw   .80     ; numero campioni
+		retlw	082
+		retlw	084
+		retlw	084
+		retlw	085
+		retlw	086
+		retlw	085
+		retlw	082
+		retlw	07D
+		retlw	06F
+		retlw	05B
+		retlw	062
+		retlw	06F
+		retlw	076
+		retlw	092
+		retlw	095
+		retlw	08E
+		retlw	093
+		retlw	08D
+		retlw	081
+		retlw	080
+		retlw	07C
+		retlw	073
+		retlw	072
+		retlw	077
+		retlw	07E
+		retlw	088
+		retlw	091
+		retlw	08C
+		retlw	085
+		retlw	082
+		retlw	07A
+		retlw	076
+		retlw	076
+		retlw	074
+		retlw	076
+		retlw	07D
+		retlw	081
+		retlw	086
+		retlw	08C
+		retlw	08B
+		retlw	085
+		retlw	081
+		retlw	07C
+		retlw	079
+		retlw	079
+		retlw	07B
+		retlw	07B
+		retlw	080
+		retlw	082
+		retlw	083
+		retlw	082
+		retlw	081
+		retlw	080
+		retlw	080
+		retlw	080
+		retlw	07F
+		retlw	080
+		retlw	081
+		retlw	081
+		retlw	082
+		retlw	082
+		retlw	081
+		retlw	080
+		retlw	080
+		retlw	080
+		retlw	07F
+		retlw	080
+		retlw	080
+		retlw	080
+		retlw	081
+		retlw	081
+		retlw	082
+		retlw	082
+		retlw	081
+		retlw	080
+		retlw	07F
+		retlw	07F
+		retlw	080
+		retlw	081
+        retlw   080
+
+
+PezzoM          retlw   .57     ; numero campioni
+		retlw	07E
+		retlw	07E
+		retlw	07F
+		retlw	076
+		retlw	07D
+		retlw	07D
+		retlw	07D
+		retlw	07D
+		retlw	074
+		retlw	074
+		retlw	071
+		retlw	07D
+		retlw	080
+		retlw	088
+		retlw	07D
+		retlw	076
+		retlw	081
+		retlw	094
+		retlw	08A
+		retlw	088
+		retlw	096
+		retlw	08C
+		retlw	081
+		retlw	08C
+		retlw	08F
+		retlw	08A
+		retlw	08F
+		retlw	088
+		retlw	081
+		retlw	07E
+		retlw	080
+		retlw	07F
+		retlw	07F
+		retlw	080
+		retlw	076
+		retlw	078
+		retlw	07D
+		retlw	078
+		retlw	074
+		retlw	076
+		retlw	078
+		retlw	076
+		retlw	074
+		retlw	076
+		retlw	074
+		retlw	078
+		retlw	078
+		retlw	078
+		retlw	07E
+		retlw	07E
+		retlw	07E
+		retlw	07D
+		retlw	07F
+		retlw	080
+		retlw	07F
+		retlw	080
+		retlw	07E
 ;----------------------------------------------------------------------------
 ;
 ;PezzoS          retlw   .107*2     ; numero campioni (compressi): 2x
@@ -466,291 +664,5 @@ PezzoS          retlw   .98*2     ; numero campioni (compressi): 2x
 ;		retlw	05F
 ;		retlw	050
 ;		retlw	0F6
-
-;Sinus
-;		retlw	.16
-;		retlw	.128	; 0
-;		retlw	.148	; 1
-;		retlw	.168	; 2
-;		retlw	.178	; 3
-;		retlw	.184	; 4
-;		retlw	.178	; 5
-;		retlw	.168	; 6
-;		retlw	.148	; 7
-;		retlw	.128	; 8
-;		retlw	.108	; 9
-;		retlw	.88	; 10
-;		retlw	.78	; 11
-;		retlw	.74	; 12
-;		retlw	.78	; 13
-;		retlw	.88	; 14
-;		retlw	.108	; 15
-
-
-;****************************************************************************
-;
-                ORG     100             ; inizio seconda pagina dati
-
-Estrai1         movf    Puntatore,W     ;
-                addwf   PCL             ; somma l'offset in W al PC
-;
-TabIn2          ; offset inizio tabella in pag 2
-
-PezzoA          retlw   .79     ; numero campioni
-		retlw	082
-		retlw	084
-		retlw	084
-		retlw	085
-		retlw	086
-		retlw	085
-		retlw	082
-		retlw	07D
-		retlw	06F
-		retlw	05B
-		retlw	062
-		retlw	06F
-		retlw	076
-		retlw	092
-		retlw	095
-		retlw	08E
-		retlw	093
-		retlw	08D
-		retlw	081
-		retlw	080
-		retlw	07C
-		retlw	073
-		retlw	072
-		retlw	077
-		retlw	07E
-		retlw	088
-		retlw	091
-		retlw	08C
-		retlw	085
-		retlw	082
-		retlw	07A
-		retlw	076
-		retlw	076
-		retlw	074
-		retlw	076
-		retlw	07D
-		retlw	081
-		retlw	086
-		retlw	08C
-		retlw	08B
-		retlw	085
-		retlw	081
-		retlw	07C
-		retlw	079
-		retlw	079
-		retlw	07B
-		retlw	07B
-		retlw	080
-		retlw	082
-		retlw	083
-		retlw	082
-		retlw	081
-		retlw	080
-		retlw	080
-		retlw	080
-		retlw	07F
-		retlw	080
-		retlw	081
-		retlw	081
-		retlw	082
-		retlw	082
-		retlw	081
-		retlw	080
-		retlw	080
-		retlw	080
-		retlw	07F
-		retlw	080
-		retlw	080
-		retlw	080
-		retlw	081
-		retlw	081
-		retlw	082
-		retlw	082
-		retlw	081
-		retlw	080
-		retlw	07F
-		retlw	07F
-		retlw	080
-		retlw	081
-
-PezzoE          retlw   .65     ; numero campioni
-		retlw	067
-		retlw	05A
-		retlw	06A
-		retlw	07F
-		retlw	079
-		retlw	061
-		retlw	06A
-		retlw	07E
-		retlw	07D
-		retlw	0A6
-		retlw	0FE
-		retlw	081
-		retlw	080
-		retlw	0DF
-		retlw	0D5
-		retlw	08A
-		retlw	05D
-		retlw	052
-		retlw	04D
-		retlw	080
-		retlw	048
-		retlw	01B
-		retlw	05F
-		retlw	0AB
-		retlw	0AF
-		retlw	094
-		retlw	0A0
-		retlw	0B3
-		retlw	0CB
-		retlw	0B9
-		retlw	06C
-		retlw	03E
-		retlw	07D
-		retlw	087
-		retlw	060
-		retlw	04E
-		retlw	076
-		retlw	099
-		retlw	0AB
-		retlw	0A1
-		retlw	096
-		retlw	0BF
-		retlw	0B9
-		retlw	08C
-		retlw	070
-		retlw	074
-		retlw	06C
-		retlw	06A
-		retlw	065
-		retlw	065
-		retlw	083
-		retlw	09A
-		retlw	092
-		retlw	08C
-		retlw	09B
-		retlw	099
-		retlw	088
-		retlw	07E
-		retlw	070
-		retlw	074
-		retlw	079
-		retlw	080
-		retlw	080
-		retlw	080
-		retlw	07F
-
-PezzoI  retlw   .48     ; numero campioni
-        retlw   077
-        retlw   075
-        retlw   08D
-        retlw   0AD
-        retlw   079
-        retlw   07D
-        retlw   0BA
-        retlw   0B0
-        retlw   090
-        retlw   097
-        retlw   0B2
-        retlw   0A4
-        retlw   08A
-        retlw   080
-        retlw   07A
-        retlw   080
-        retlw   072
-        retlw   050
-        retlw   059
-        retlw   074
-        retlw   064
-        retlw   05B
-        retlw   073
-        retlw   080
-        retlw   080
-        retlw   087
-        retlw   091
-        retlw   098
-        retlw   09C
-        retlw   0A2
-        retlw   09E
-        retlw   09D
-        retlw   097
-        retlw   08D
-        retlw   086
-        retlw   082
-        retlw   074
-        retlw   06C
-        retlw   06F
-        retlw   070
-        retlw   066
-        retlw   067
-        retlw   074
-        retlw   078
-        retlw   076
-        retlw   078
-        retlw   080
-        retlw   081
-
-PezzoM          retlw   .57     ; numero campioni
-		retlw	07E
-		retlw	07E
-		retlw	07F
-		retlw	076
-		retlw	07D
-		retlw	07D
-		retlw	07D
-		retlw	07D
-		retlw	074
-		retlw	074
-		retlw	071
-		retlw	07D
-		retlw	080
-		retlw	088
-		retlw	07D
-		retlw	076
-		retlw	081
-		retlw	094
-		retlw	08A
-		retlw	088
-		retlw	096
-		retlw	08C
-		retlw	081
-		retlw	08C
-		retlw	08F
-		retlw	08A
-		retlw	08F
-		retlw	088
-		retlw	081
-		retlw	07E
-		retlw	080
-		retlw	07F
-		retlw	07F
-		retlw	080
-		retlw	076
-		retlw	078
-		retlw	07D
-		retlw	078
-		retlw	074
-		retlw	076
-		retlw	078
-		retlw	076
-		retlw	074
-		retlw	076
-		retlw	074
-		retlw	078
-		retlw	078
-		retlw	078
-		retlw	07E
-		retlw	07E
-		retlw	07E
-		retlw	07D
-		retlw	07F
-		retlw	080
-		retlw	07F
-		retlw	080
-		retlw	07E
 
         END
