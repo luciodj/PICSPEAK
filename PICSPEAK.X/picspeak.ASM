@@ -18,6 +18,7 @@
 ; VERSIONE   : 1.05     27/04/94  versione per pic56 su due pagine
 ; VERSIONE   : 1.06     28/04/94  tabelle brani/parti piu' compatte
 ; VERSIONE   : 2.00     20/11/16  porting to PIC10F322
+
 ;----------------------------------------------------------------------------
 ;
 ; PINOUT PIC10F322                | Struttura interna
@@ -36,17 +37,17 @@
 
 ; ===== Assignments =========================================================
 
-SW		equ     3               ; (input) trigger di inizio
+SW		equ     3       ; (input) trigger di inizio
 LED		equ     1		;
-PWM		equ	0		; (output) PWM
+PWM		equ     0		; (output) PWM
 
 ; Valori del registro flag di compressione e scalaggio
 VOL1            equ     00      ; volume al 100%
 VOL14           equ     10      ; volume al 25%
 VOL12           equ     20      ; volume al 50%
 VOL34           equ     30      ; volume al 75%
-S14             equ	4
-S12             equ	5
+S14             equ     4
+S12             equ     5
 COMPRESSED      equ     6       ; due nibble per campione
 LAST            equ     7       ; marca l'ultimo Flag
 
@@ -282,7 +283,7 @@ TabIn   ; offset per i salti calcolati in pag1
 ;Brano0          retlw   Ma-TabIn     ; offset alla tabella del brano
 ;Brano1          retlw   Si-TabIn
 ;Brano2          retlw   Ies-TabIn
-Brano3          retlw   Sistemax-TabIn
+Brano3          retlw   Hackaday-TabIn
 ;
 ; ogni brano e' composto da un campo "numero di parti"
 ; Brano0NP      retlw   X               ; numero delle parti a seguire
@@ -301,59 +302,61 @@ Brano3          retlw   Sistemax-TabIn
 ; PezzoYS..     etc...
 ;
 
-; tabella di composizione del brano "sistemax.wav"
+; tabella di composizione del brano "Hackaday"
 
-Sistemax        retlw   7               ; numero delle parti componenti
+Hackaday        retlw   8               ; numero delle parti componenti
 
-; prima parte   la consonante S
-        retlw   0               ; pag. 1
-        retlw   (PezzoS-TabIn)   ; puntatore al pezzo
-        retlw   1<<COMPRESSED | .6 | 1<<LAST
+; 'A
+        retlw   1               ; pag
+        retlw   PezzoA-TabIn2   ; puntatore al pezzo
+        retlw   VOL1  | .15 | 1<<LAST
 
-; 2 parte   la vocale I
-        retlw   1               ; pag. 1
-        retlw   PezzoI-TabIn2   ; puntatore al pezzo
-        retlw   VOL14 | 2
-        retlw   VOL1  | 4
-        retlw   VOL34 | 4
-        retlw   VOL12 | 2
-        retlw   VOL14 | 2 | 1<<LAST
-
-; 3 parte un bel silenzio
+; silenzio
         retlw   0               ; pag
         retlw   SILENCE         ; puntatore a 1/60s di silenzio
-        retlw   VOL1  | .6 | 1<<LAST ; 1/10s silenzio
+        retlw   VOL1  | .8 | 1<<LAST ; 1/10s silenzio
 
-; 4 parte   la consonante S di nuovo
+; short S (k)
         retlw   0               ; pag
         retlw   (PezzoS-TabIn)  ; puntatore al pezzo
         retlw   1<<COMPRESSED | .3 | 1<<LAST
 
-; 5 parte   la vocale E
-        retlw   1               ; pag
-        retlw   PezzoE-TabIn2
-        retlw   VOL1 | 4        ; colpo sulla E
-        retlw   VOL34 | 1
-        retlw   VOL12 | 1
-        retlw   VOL14 | 1 | 1<<LAST
-
-; 6 parte  la consonante M
-        retlw   1               ; pag
-        retlw   (PezzoM-TabIn2) ; puntatore al pezzo
-        retlw   VOL34 | 4
-        retlw   VOL1  | 4 | 1<<LAST
-
-; 7 parte   la vocale A
+; 'A
         retlw   1               ; pag
         retlw   PezzoA-TabIn2   ; puntatore al pezzo
-        retlw   VOL1  | 7
-        retlw   VOL12 | 7 | 1<<LAST
+        retlw   VOL1  | .10 | 1<<LAST
+
+; D
+        retlw   1               ; pag
+        retlw   (PezzoM-TabIn2) ; puntatore al pezzo
+;        retlw   VOL34 | 4
+        retlw   VOL34  | 8 | 1<<LAST
+
+; E
+        retlw   1               ; pag. 1
+        retlw   (PezzoE-TabIn2)   ; puntatore al pezzo
+        retlw   VOL34 | 6
+        retlw   VOL12 | 4| 1<<LAST
+
+; I
+        retlw   1               ; pag. 1
+        retlw   PezzoI-TabIn2   ; puntatore al pezzo
+;        retlw   VOL14 | 2
+;        retlw   VOL1  | 4
+        retlw   VOL34 | 8
+        retlw   VOL12 | 4
+        retlw   VOL14 | 4 | 1<<LAST
+
+; silenzio
+        retlw   0               ; pag
+        retlw   SILENCE         ; puntatore a 1/60s di silenzio
+        retlw   VOL1  | .15 | 1<<LAST ; 1/10s silenzio
 
 
 ;----------------------------------------------------------------------------
 ;
 ;PezzoS          retlw   .107*2     ; numero campioni (compressi): 2x
-PezzoS          retlw   .99*2     ; numero campioni (compressi): 2x
+PezzoS          retlw   .98*2     ; numero campioni (compressi): 2x
 		retlw	00E
 		retlw	00F
 		retlw	00E
