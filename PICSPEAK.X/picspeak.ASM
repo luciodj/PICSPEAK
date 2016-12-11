@@ -18,7 +18,7 @@
 ; VERSIONE   : 1.05     27/04/94  versione per pic56 su due pagine
 ; VERSIONE   : 1.06     28/04/94  tabelle brani/parti piu' compatte
 ; VERSIONE   : 2.00     20/11/16  porting to PIC10F322
-
+; VERSIONE   : 2.01     12/12/16  using NCO to scale vowels tables
 ;----------------------------------------------------------------------------
 ;
 ; PINOUT PIC10F322                | Struttura interna
@@ -324,7 +324,7 @@ Hackaday        retlw   8               ; numero delle parti componenti
         retlw   PezzoA-TabIn2   ; puntatore al pezzo
         retlw   HIGH(VOWELA)
         retlw   LOW(VOWELA)
-        retlw   VOL1  | .15 | 1<<LAST
+        retlw   VOL1  | 8 | 1<<LAST
 
 ; silenzio
         retlw   0               ; pag
@@ -345,14 +345,14 @@ Hackaday        retlw   8               ; numero delle parti componenti
         retlw   PezzoA-TabIn2   ; puntatore al pezzo
         retlw   HIGH(VOWELA)
         retlw   LOW(VOWELA)
-        retlw   VOL1  | .10 | 1<<LAST
+        retlw   VOL1  | 8 | 1<<LAST
 
 ; D
         retlw   1               ; pag
         retlw   PezzoM-TabIn2   ; puntatore al pezzo
         retlw   HIGH(EIGHTK)
         retlw   LOW(EIGHTK)
-;        retlw   VOL34 | 4
+        retlw   VOL34 | 4
         retlw   VOL1  | 4 | 1<<LAST
 
 ; E
@@ -360,17 +360,17 @@ Hackaday        retlw   8               ; numero delle parti componenti
         retlw   PezzoA-TabIn2   ; puntatore al pezzo
         retlw   HIGH(VOWELE)
         retlw   LOW(VOWELE)
-        retlw   VOL1 | .15
-        retlw   VOL12 | .15| 1<<LAST
+        retlw   VOL1 | .8
+        retlw   VOL12 | .4| 1<<LAST
 
 ; I
         retlw   1               ; pag. 1
         retlw   PezzoA-TabIn2   ; puntatore al pezzo
         retlw   HIGH(VOWELI)
         retlw   LOW(VOWELI)
-;        retlw   VOL14 | 2
-        retlw   VOL1  | .15
-        retlw   VOL34 | 8
+        retlw   VOL12 | 8
+;        retlw   VOL1  | 4
+;        retlw   VOL34 | 4
         retlw   VOL12 | 4
         retlw   VOL14 | 4 | 1<<LAST
 
@@ -380,28 +380,6 @@ Hackaday        retlw   8               ; numero delle parti componenti
         retlw   HIGH(EIGHTK)
         retlw   LOW(EIGHTK)
         retlw   VOL1  | .15 | 1<<LAST ; 1/10s silenzio
-
-
-
-;Sinus
-;		retlw	.16
-;		retlw	.128	; 0
-;		retlw	.148	; 1
-;		retlw	.168	; 2
-;		retlw	.178	; 3
-;		retlw	.184	; 4
-;		retlw	.178	; 5
-;		retlw	.168	; 6
-;		retlw	.148	; 7
-;		retlw	.128	; 8
-;		retlw	.108	; 9
-;		retlw	.88	; 10
-;		retlw	.78	; 11
-;		retlw	.74	; 12
-;		retlw	.78	; 13
-;		retlw	.88	; 14
-;		retlw	.108	; 15
-
 
 ;****************************************************************************
 ;
